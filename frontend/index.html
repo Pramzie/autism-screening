@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SpectrumSense: Autism Screening System</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100;0,200;0,300;0,400;0,600;0,700;1,300;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+
+<div id="cur-dot"></div>
+<div id="cur-ring"></div>
+
+<!-- ===================== NAV ===================== -->
+<nav id="nav">
+  <a href="#" class="logo">Spectrum<span>Sense</span></a>
+  <ul class="nav-links">
+    <li><a href="#hscroll-sec">Features</a></li>
+    <li><a href="#aware-sec">Awareness</a></li>
+    <li><a href="#signs-sec">Clinical Signs</a></li>
+    <li><a href="#map-sec">Find Help</a></li>
+  </ul>
+  <button class="nav-btn" onclick="smoothTo('api-panel')">Begin Screening</button>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow rv">
+      <span class="hero-eyebrow-line"></span>
+      CNN-Based Facial Analysis
+    </div>
+    <h1 class="hero-h1 rv" style="transition-delay:.1s">
+      Understanding<br/>the <em>Spectrum</em><br/>Through Vision
+    </h1>
+    <p class="hero-p rv" style="transition-delay:.2s">
+      A deep learning system that analyses facial cues, blink patterns, and expression variability to provide early autism screening — accessible, non-invasive, and research-grade.
+    </p>
+    <div class="hero-btns rv" style="transition-delay:.3s">
+      <button class="btn-primary" onclick="smoothTo('api-panel')">Start Screening</button>
+      <a href="#aware-sec" class="btn-ghost">Learn More</a>
+    </div>
+  </div>
+
+  <!-- FIX: hero-right is now a proper positioned wrapper -->
+  <div class="hero-right rv" style="transition-delay:.2s">
+    <canvas id="brain-canvas"></canvas>
+    <div class="brain-labels">
+      <div class="b-label bl-frontal">
+        <div class="b-label-dot" style="background:var(--amber)"></div>
+        <span class="b-label-line" style="width:36px;background:var(--amber)"></span>
+        <span style="color:var(--amber)">Frontal Lobe</span>
+      </div>
+      <div class="b-label bl-temporal">
+        <div class="b-label-dot" style="background:var(--red-hl)"></div>
+        <span class="b-label-line" style="width:36px;background:var(--red-hl)"></span>
+        <span style="color:var(--red-hl)">Temporal Lobe</span>
+      </div>
+      <div class="b-label bl-parietal">
+        <span style="color:var(--blue-hl)">Parietal Lobe</span>
+        <span class="b-label-line" style="width:36px;background:var(--blue-hl)"></span>
+        <div class="b-label-dot" style="background:var(--blue-hl)"></div>
+      </div>
+      <div class="b-label bl-cerebellum">
+        <span style="color:var(--green-hl)">Cerebellum</span>
+        <span class="b-label-line" style="width:36px;background:var(--green-hl)"></span>
+        <div class="b-label-dot" style="background:var(--green-hl)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-disclaimer">
+    <span>This tool is a screening aid only — not a clinical diagnosis. Consult a qualified medical professional for assessment.</span>
+  </div>
+</section>
+
+<!-- ===================== HORIZONTAL SCROLL ===================== -->
+<section id="hscroll-sec">
+  <div class="hscroll-head rv">
+    <div class="sec-tag">System Capabilities</div>
+    <h2 class="sec-title">What the System<br/><em>Analyses</em></h2>
+    <p class="sec-sub">Each session captures 50 frames over 5 seconds, running them through a trained CNN alongside five distinct facial feature metrics.</p>
+  </div>
+
+  <div class="marquee-outer">
+    <div class="marquee-track" id="marquee-track">
+      <!-- SET 1 -->
+      <div class="h-card">
+        <div class="h-card-num">01</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg></div>
+        <h3>Blink Rate Analysis</h3>
+        <p>Measures blink frequency per minute. Atypical rates — below 10 or above 25 per minute — are flagged as potential indicators of ASD.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">02</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg></div>
+        <h3>Facial Symmetry</h3>
+        <p>Compares pixel intensity between left and right face halves. Asymmetry exceeding 5% of the normalised mean difference indicates a potential anomaly.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">03</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <h3>Expression Variability</h3>
+        <p>Tracks variance in facial muscle movement between consecutive frames. Values below 50 units suggest reduced emotional expressiveness, a known ASD marker.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">04</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg></div>
+        <h3>Head Movement</h3>
+        <p>Tracks displacement of the facial centroid across frames. Both hyperkinetic (above 45px) and hypokinetic (below 2px) motion are flagged as atypical.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">05</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+        <h3>CNN Classification</h3>
+        <p>All 50 frames are individually scored by the trained Keras model. The averaged output probability determines severity: Non-Autistic, Low, Medium, or High.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">06</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
+        <h3>Severity Banding</h3>
+        <p>Results are mapped to four confidence bands: above 0.85 is High, 0.65–0.84 is Medium, 0.50–0.64 is Low, and below 0.50 is Non-Autistic.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">07</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Eye Detection Ratio</h3>
+        <p>Measures the proportion of frames in which both eyes are detected via Haar cascade. A ratio below 0.70 may indicate gaze aversion, a documented ASD indicator.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">08</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+        <h3>Real-Time Feedback</h3>
+        <p>Live blink count, face detection status, symmetry percentage, and elapsed time are displayed on-screen during the 5-second capture window.</p>
+      </div>
+      <!-- SET 2 (duplicate for seamless loop) -->
+      <div class="h-card">
+        <div class="h-card-num">01</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg></div>
+        <h3>Blink Rate Analysis</h3>
+        <p>Measures blink frequency per minute. Atypical rates — below 10 or above 25 per minute — are flagged as potential indicators of ASD.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">02</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg></div>
+        <h3>Facial Symmetry</h3>
+        <p>Compares pixel intensity between left and right face halves. Asymmetry exceeding 5% of the normalised mean difference indicates a potential anomaly.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">03</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <h3>Expression Variability</h3>
+        <p>Tracks variance in facial muscle movement between consecutive frames. Values below 50 units suggest reduced emotional expressiveness, a known ASD marker.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">04</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg></div>
+        <h3>Head Movement</h3>
+        <p>Tracks displacement of the facial centroid across frames. Both hyperkinetic (above 45px) and hypokinetic (below 2px) motion are flagged as atypical.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">05</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+        <h3>CNN Classification</h3>
+        <p>All 50 frames are individually scored by the trained Keras model. The averaged output probability determines severity: Non-Autistic, Low, Medium, or High.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">06</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
+        <h3>Severity Banding</h3>
+        <p>Results are mapped to four confidence bands: above 0.85 is High, 0.65–0.84 is Medium, 0.50–0.64 is Low, and below 0.50 is Non-Autistic.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">07</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Eye Detection Ratio</h3>
+        <p>Measures the proportion of frames in which both eyes are detected via Haar cascade. A ratio below 0.70 may indicate gaze aversion, a documented ASD indicator.</p>
+      </div>
+      <div class="h-card">
+        <div class="h-card-num">08</div>
+        <div class="h-card-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+        <h3>Real-Time Feedback</h3>
+        <p>Live blink count, face detection status, symmetry percentage, and elapsed time are displayed on-screen during the 5-second capture window.</p>
+      </div>
+    </div>
+  </div>
+  <p class="scroll-hint rv">Auto-scrolling · Hover to pause</p>
+</section>
+
+<!-- ===================== STATS ===================== -->
+<div id="stats-row">
+  <div class="stat-cell rv">
+    <div class="stat-n">1 in 100</div>
+    <div class="stat-l">Global Prevalence</div>
+    <p class="stat-d">Approximately 1 in 100 children worldwide are on the autism spectrum</p>
+  </div>
+  <div class="stat-cell rv" style="transition-delay:.1s">
+    <div class="stat-n">50</div>
+    <div class="stat-l">Frames Per Session</div>
+    <p class="stat-d">Each screening captures 50 high-quality facial frames over 5 seconds</p>
+  </div>
+  <div class="stat-cell rv" style="transition-delay:.2s">
+    <div class="stat-n">5</div>
+    <div class="stat-l">Metrics Evaluated</div>
+    <p class="stat-d">Five distinct facial and behavioural features analysed in parallel</p>
+  </div>
+  <div class="stat-cell rv" style="transition-delay:.3s">
+    <div class="stat-n">4</div>
+    <div class="stat-l">Severity Bands</div>
+    <p class="stat-d">Results mapped to Non-Autistic, Low, Medium, and High confidence levels</p>
+  </div>
+</div>
+
+<!-- ===================== SCREENING (3D Visual) ===================== -->
+<section id="screen-sec">
+  <div id="screen-canvas-wrap" class="rv">
+    <canvas id="screen-canvas"></canvas>
+  </div>
+  <div class="screen-info rv" style="transition-delay:.15s">
+    <div class="sec-tag">The Model</div>
+    <h2 class="sec-title">CNN Architecture<br/><em>Behind the Screen</em></h2>
+    <p class="sec-sub">The Keras model processes frames at 224×224 resolution. Multiple convolutional layers extract spatial facial feature maps before producing a normalised probability output.</p>
+
+    <div class="metric-bars">
+      <div class="m-row">
+        <span class="m-label">Face Detection</span>
+        <div class="m-track"><div class="m-fill" data-w=".96"></div></div>
+        <span class="m-val">96%</span>
+      </div>
+      <div class="m-row">
+        <span class="m-label">Eye Detection</span>
+        <div class="m-track"><div class="m-fill" data-w=".88"></div></div>
+        <span class="m-val">88%</span>
+      </div>
+      <div class="m-row">
+        <span class="m-label">CNN Confidence</span>
+        <div class="m-track"><div class="m-fill" data-w=".82"></div></div>
+        <span class="m-val">82%</span>
+      </div>
+      <div class="m-row">
+        <span class="m-label">Symmetry Precision</span>
+        <div class="m-track"><div class="m-fill" data-w=".91"></div></div>
+        <span class="m-val">91%</span>
+      </div>
+    </div>
+
+    <div class="screen-btns">
+      <div class="tip-wrap">
+        <button class="btn-primary" onclick="smoothTo('api-panel')">Start Live Screening</button>
+        <div class="tip-box">
+          Opens the webcam screening panel below. Frames are sent as base64 to your Render backend at <strong style="color:var(--teal)">/predict</strong>. Results include avg_prob, severity band, and all five feature metrics.
+        </div>
+      </div>
+      <div class="tip-wrap">
+        <a href="#map-sec" class="btn-ghost">Find a Specialist</a>
+        <div class="tip-box">
+          Use the interactive map below to locate the nearest autism treatment hospitals and pharmacies within 5km of your current location using live OpenStreetMap data.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BACKEND SCREENING PANEL ===================== -->
+<section id="api-panel">
+  <div class="api-header rv">
+    <div class="sec-tag">Live Analysis</div>
+    <h2 class="sec-title">Real-Time<br/><em>Screening Panel</em></h2>
+    <p class="sec-sub">Position your face in the camera frame and press Start. 50 frames are captured over 5 seconds and analysed by the CNN model.</p>
+  </div>
+
+  <div class="api-grid rv" style="transition-delay:.1s">
+    <!-- Left: webcam + controls -->
+    <div>
+      <div id="webcam-box">
+        <!-- State: idle -->
+        <div id="webcam-overlay">
+          <svg width="40" height="40" fill="none" stroke="var(--muted2)" stroke-width="1" viewBox="0 0 24 24">
+            <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+          </svg>
+          <span style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted2)">Camera inactive</span>
+        </div>
+        <!-- State: active -->
+        <div id="webcam-active">
+          <video id="webcam-video" autoplay playsinline muted></video>
+          <div id="scan-line"></div>
+          <div class="webcam-label">LIVE CAPTURE</div>
+          <div class="webcam-blink" id="blink-dot"></div>
+        </div>
+        <div id="capture-progress"><div id="capture-bar"></div></div>
+        <div id="live-metrics">
+          <div class="live-m">Frames: <span id="lm-frames">0</span>/50</div>
+          <div class="live-m">Time: <span id="lm-time">0.0</span>s</div>
+          <div class="live-m">Status: <span id="lm-status">Initialising</span></div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px;">
+        <button class="btn-primary" id="start-btn" onclick="startCapture()" style="width:100%;padding:14px;">
+          ▶ &nbsp;Start 5-Second Capture
+        </button>
+        <button class="btn-ghost" id="stop-btn" onclick="stopCapture()" style="width:100%;padding:14px;display:none;">
+          ■ &nbsp;Stop
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: results only -->
+    <div class="api-controls">
+      <div id="result-card">
+        <h5>Screening Result</h5>
+        <div class="result-band" id="result-band-text">—</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
+          Probability: <span id="result-prob" style="color:var(--teal);font-weight:600;">—</span>
+        </div>
+        <div class="result-metrics">
+          <div class="rm-item">
+            <div class="rm-label">Blink Rate</div>
+            <div class="rm-val" id="rm-blink">—</div>
+          </div>
+          <div class="rm-item">
+            <div class="rm-label">Eye Detect Ratio</div>
+            <div class="rm-val" id="rm-eye">—</div>
+          </div>
+          <div class="rm-item">
+            <div class="rm-label">Facial Symmetry</div>
+            <div class="rm-val" id="rm-sym">—</div>
+          </div>
+          <div class="rm-item">
+            <div class="rm-label">Head Movement</div>
+            <div class="rm-val" id="rm-head">—</div>
+          </div>
+          <div class="rm-item">
+            <div class="rm-label">Expr. Variability</div>
+            <div class="rm-val" id="rm-expr">—</div>
+          </div>
+          <div class="rm-item">
+            <div class="rm-label">Frames Analysed</div>
+            <div class="rm-val" id="rm-frames">—</div>
+          </div>
+        </div>
+        <p class="result-disclaimer">
+          This result is a screening indicator only. It does not constitute a medical diagnosis. Please consult a qualified developmental paediatrician or psychologist.
+        </p>
+      </div><!-- /result-card -->
+    </div><!-- /api-controls -->
+  </div><!-- /api-grid -->
+</section>
+
+<!-- ===================== AWARENESS ===================== -->
+<section id="aware-sec">
+  <div class="rv">
+    <div class="sec-tag aware-sec-tag">Understanding Autism</div>
+    <h2 class="sec-title">Awareness &<br/><em>Education</em></h2>
+    <p class="sec-sub">Autism Spectrum Disorder is a complex neurodevelopmental condition. Early recognition and informed, compassionate support make a meaningful difference in outcomes.</p>
+  </div>
+  <div class="aware-grid rv" style="transition-delay:.1s">
+    <div class="a-card">
+      <div class="a-tag">What is ASD</div>
+      <h3>Autism Spectrum Disorder Explained</h3>
+      <p>ASD is a lifelong neurodevelopmental condition characterised by differences in social communication and interaction, alongside restricted and repetitive patterns of behaviour. It is a spectrum; every individual's experience is unique.</p>
+      <a href="https://www.who.int/news-room/fact-sheets/detail/autism-spectrum-disorders" target="_blank" class="a-link">Read More <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+    <div class="a-card">
+      <div class="a-tag">Early Detection</div>
+      <h3>Why Early Screening Matters</h3>
+      <p>Research consistently shows that early intervention — ideally before age 3 — leads to significantly better outcomes in language development, social skills, and adaptive behaviour. Accessible screening tools enable earlier identification.</p>
+      <a href="https://www.cdc.gov/autism/signs-symptoms/index.html" target="_blank" class="a-link">Read More <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+    <div class="a-card">
+      <div class="a-tag">Supporting Families</div>
+      <h3>Resources for Parents and Caregivers</h3>
+      <p>Families navigating a diagnosis benefit most from community, professional guidance, and accurate information. Occupational therapy, speech therapy, and structured educational programmes are key pillars of support.</p>
+      <a href="https://autismspeaks.org" target="_blank" class="a-link">Read More <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+    <div class="a-card">
+      <div class="a-tag">Myths vs Facts</div>
+      <h3>Dispelling Common Misconceptions</h3>
+      <p>Autism is not caused by vaccines. It is not a result of bad parenting. Autistic people are not less intelligent; many demonstrate exceptional abilities in specific domains. Understanding requires replacing myths with evidence.</p>
+      <a href="https://www.autism.org.uk/advice-and-guidance/what-is-autism" target="_blank" class="a-link">Read More <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+    <div class="a-card">
+      <div class="a-tag">Technology and ASD</div>
+      <h3>How AI Is Changing Diagnosis</h3>
+      <p>Machine learning models are increasingly applied to facial recognition, eye-tracking, and behavioural pattern analysis. Systems like SpectrumSense represent a new frontier in scalable, low-cost screening tools.</p>
+      <a href="https://www.frontiersin.org/journals/psychiatry" target="_blank" class="a-link">Read More <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+    <div class="a-card">
+      <div class="a-tag">Inclusion</div>
+      <h3>Building Inclusive Communities</h3>
+      <p>True inclusion means designing schools, workplaces, and public spaces with neurodiversity in mind. Sensory-friendly environments, clear communication, and patience form the foundation of a genuinely inclusive society.</p>
+      <a href="https://www.autism-europe.org" target="_blank" class="a-link">Read More <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SIGNS ===================== -->
+<section id="signs-sec">
+  <div class="rv">
+    <div class="sec-tag">Clinical Indicators</div>
+    <h2 class="sec-title">Common Signs<br/><em>to Watch For</em></h2>
+    <p class="sec-sub">Early signs of ASD may be visible from 12 to 18 months of age. These indicators should prompt consultation with a developmental paediatrician.</p>
+  </div>
+  <div class="accord rv" style="transition-delay:.1s">
+    <div class="ac-item open">
+      <div class="ac-head" onclick="toggleAc(this)">
+        <h4>Social Communication Differences</h4>
+        <div class="ac-plus"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+      </div>
+      <div class="ac-body">
+        <p>Limited or absent eye contact, delayed speech development, difficulty understanding non-literal language, reduced use of gestures, and challenges in back-and-forth conversation. Some children may not respond to their name by 12 months.</p>
+      </div>
+    </div>
+    <div class="ac-item">
+      <div class="ac-head" onclick="toggleAc(this)">
+        <h4>Restricted and Repetitive Behaviours</h4>
+        <div class="ac-plus"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+      </div>
+      <div class="ac-body">
+        <p>Repetitive motor movements such as hand flapping or rocking, insistence on sameness in routines, highly restricted interests, and unusual sensory responses to light, sound, texture, or smell.</p>
+      </div>
+    </div>
+    <div class="ac-item">
+      <div class="ac-head" onclick="toggleAc(this)">
+        <h4>Sensory Processing Differences</h4>
+        <div class="ac-plus"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+      </div>
+      <div class="ac-body">
+        <p>Hypersensitivity or hyposensitivity to sensory input is common. This may manifest as distress in noisy environments, aversion to certain textures, reduced pain response, or a strong preference for specific sensory stimuli.</p>
+      </div>
+    </div>
+    <div class="ac-item">
+      <div class="ac-head" onclick="toggleAc(this)">
+        <h4>Developmental Milestone Differences</h4>
+        <div class="ac-plus"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+      </div>
+      <div class="ac-body">
+        <p>No babbling by 12 months, no meaningful single words by 16 months, no two-word phrases by 24 months, or any regression in previously acquired language or social skills at any age should prompt professional evaluation immediately.</p>
+      </div>
+    </div>
+    <div class="ac-item">
+      <div class="ac-head" onclick="toggleAc(this)">
+        <h4>Facial Patterns Detected by AI</h4>
+        <div class="ac-plus"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+      </div>
+      <div class="ac-body">
+        <p>Research suggests subtle differences in blink rate, gaze direction, facial symmetry, and expression variability can be detected computationally. This system analyses these patterns non-invasively through a standard webcam feed in real time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== MAP ===================== -->
+<section id="map-sec">
+  <div class="rv">
+    <div class="sec-tag">Find Help Near You</div>
+    <h2 class="sec-title">Nearest Hospitals<br/><em>and Pharmacies</em></h2>
+    <p class="sec-sub">Locate autism treatment centres and medical facilities in your area using real-time OpenStreetMap data within a 5km radius.</p>
+  </div>
+  <div class="map-grid rv" style="transition-delay:.1s">
+    <div id="the-map"></div>
+    <div class="map-panel">
+      <button class="map-btn" onclick="locateUser()">📍 &nbsp;Use My Location</button>
+      <div class="map-box">
+        <h5>Hospitals</h5>
+        <ul class="pl-list" id="hosp-list">
+          <li class="pl-item" style="color:var(--muted2)">Click "Use My Location" to find nearby hospitals</li>
+        </ul>
+      </div>
+      <div class="map-box">
+        <h5>Pharmacies</h5>
+        <ul class="pl-list" id="pharm-list">
+          <li class="pl-item" style="color:var(--muted2)">Click "Use My Location" to find nearby pharmacies</li>
+        </ul>
+      </div>
+      <p class="map-note">Location data is not stored. Results sourced from OpenStreetMap via Overpass API within a 5km radius.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA ===================== -->
+<section id="cta-sec">
+  <div class="rv">
+    <div class="sec-tag">Minor Project — KIIT University</div>
+    <h2 class="sec-title">Begin Your<br/>Screening Today</h2>
+    <p class="sec-sub">This tool is intended for research and educational purposes. Results should always be reviewed alongside a qualified medical professional.</p>
+    <a href="#api-panel" class="btn-white" onclick="smoothTo('api-panel');return false;">Start Screening</a>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div>
+    <div class="f-logo">Spectrum<span>Sense</span></div>
+    <p>A CNN-based autism screening system developed as a minor project at KIIT University. Not a clinical diagnostic tool. For educational and research use only.</p>
+  </div>
+  <div>
+    <h6>Navigation</h6>
+    <ul>
+      <li><a href="#hscroll-sec">Features</a></li>
+      <li><a href="#aware-sec">Awareness</a></li>
+      <li><a href="#signs-sec">Clinical Signs</a></li>
+      <li><a href="#map-sec">Find Help</a></li>
+      <li><a href="#api-panel">Live Screening</a></li>
+    </ul>
+  </div>
+  <div>
+    <h6>Resources</h6>
+    <ul>
+      <li><a href="https://www.who.int/news-room/fact-sheets/detail/autism-spectrum-disorders" target="_blank">WHO: ASD Fact Sheet</a></li>
+      <li><a href="https://www.cdc.gov/autism" target="_blank">CDC Autism Resources</a></li>
+      <li><a href="https://autismspeaks.org" target="_blank">Autism Speaks</a></li>
+      <li><a href="https://www.autism.org.uk" target="_blank">National Autistic Society</a></li>
+    </ul>
+  </div>
+  <div class="f-disc">
+    SpectrumSense is a research project and screening aid only. It is not intended to replace clinical diagnosis. Please consult a qualified developmental paediatrician or psychologist for any concerns. Developed at KIIT University as part of a minor project programme.
+  </div>
+</footer>
+
+<!-- =====================================================================
+     JAVASCRIPT
+     ===================================================================== -->
+<script src="js/main.js"></script>
+</body>
+</html>
